@@ -2,46 +2,46 @@
 #include <stdlib.h>
 #include <stddef.h>
 
-typedef struct list{
+typedef struct listnode_ {
     int val;
-    struct list *next;
+    struct listnode_ *next;
+} listnode;
+
+typedef struct list_ {
+    listnode *start;
 } list;
 
-list* listadd(list* head, int val){
-    list *tmp = (list*)(malloc(sizeof(list)));
+void listadd(list* alist, int val){
+    listnode *tmp = (listnode*)(malloc(sizeof(listnode)));
     tmp->val = val;
-    tmp->next = &head;
-    return(tmp);
+    tmp->next = alist->start;
+    alist->start = tmp;
 }
 
-void listdelete(list* head, int val){
-    list* i = head;
-    list* prev = i;
-    while ((i->next != NULL) || (i->val != val)){
+void listdelete(list* alist, int val){
+    listnode* i = alist->start;
+    listnode* prev = i;
+    while ((i != NULL) && (i->val != val)) {
         prev = i;
         i = prev->next;
     }
-    prev->next = i->next;
+    if (i->val == val){
+        prev->next = i->next;
+        free(i);
+    }
 }
 
 void listprint(list* head){
-    list* i = head;
-    printf("%d ", i->val);
-    printf("%p ", i->next);
-    printf("%d \n", (i->next == NULL));
-    /* *i = *(i->next);
-    printf("%d ", i->val);
-    printf("%p ", i->next);
-    printf("%d ", (i->next == NULL));*/
-    /*while ((i->next) != NULL){
+    listnode* i = head->start;
+    while (i != NULL){
         printf("%d ", i->val);
         i = i->next;
-    }*/
+    }
 }
 
 typedef struct hashtable{
     int size;
-    list* elem;
+    list elem;
 } hashtable;
 
 int hashfunction(int key, int size){
@@ -50,15 +50,17 @@ int hashfunction(int key, int size){
 
 void htadd(hashtable* atable, int key){
     int i = hashfunction(key, atable->size);
-    //hashtable->elem[i] = malloc()
+    listadd(hashtable[i].elem,key);
 }
 
 int main()
 {
-    list *testlist = NULL;
-    testlist = listadd(testlist,1);
-    testlist = listadd(testlist,2);
-    listprint(testlist);
+    list testlist = {NULL};
+    listadd(&testlist,1);
+    listadd(&testlist,2);
+    listadd(&testlist,3);
+    listdelete(&testlist,2);
+    listprint(&testlist);
     printf("Hello world!\n");
     return 0;
 }

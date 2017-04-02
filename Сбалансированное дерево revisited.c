@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
+#define HASHSIZE 9369319
+#define SEQSIZE 1000000
 
 typedef struct listnode_ {
     int val;
@@ -12,6 +14,12 @@ typedef struct list_ {
 } list;
 
 void listadd(list* alist, int val){
+    listnode* i = alist->start;
+    while (i != NULL) {
+        if (i->val == val)
+            return;
+        i = i-> next;
+    }
     listnode *tmp = (listnode*)(malloc(sizeof(listnode)));
     tmp->val = val;
     tmp->next = alist->start;
@@ -19,52 +27,74 @@ void listadd(list* alist, int val){
 }
 
 void listdelete(list* alist, int val){
+    if (alist->start == NULL) return;
     listnode* i = alist->start;
+    if (i->val == val) {
+        alist->start = i->next;
+        return;
+    }
     listnode* prev = i;
-    while ((i != NULL) && (i->val != val)) {
+    while (i != NULL) {
+        if (i->val == val){
+            prev->next = i->next;
+        }
         prev = i;
         i = prev->next;
     }
-    if (i->val == val){
-        prev->next = i->next;
-        free(i);
-    }
 }
 
-void listprint(list* head){
+void listget(list* head, int* arr, int* cnt){
     listnode* i = head->start;
     while (i != NULL){
-        printf("%d ", i->val);
+        (*cnt)++;
+        arr[*cnt] = (i->val);
         i = i->next;
     }
 }
 
 typedef struct hashtable{
-    int size;
-    list elem;
+    list elem[HASHSIZE];
 } hashtable;
 
 int hashfunction(int key, int size){
-    return(32 * key + 17) % size;
+    return(31 * key + 17) % size;
 }
 
 void htadd(hashtable* atable, int key){
-    int i = hashfunction(key, atable->size);
-    listadd(hashtable[i].elem,key);
+    int i = hashfunction(key, HASHSIZE);
+    listadd(&(*atable).elem[i], key);
 }
+
+void htremove(hashtable* atable, int key){
+    int i = hashfunction(key, HASHSIZE);
+    listdelete(&(*atable).elem[i], key);
+}
+
+void hashprint(hashtable* atable, int* arr, int* cnt){
+    for (int i = 0; i < HASHSIZE; ++i){
+        listget(&(atable->elem[i]), arr, cnt);
+    }
+}
+
+int cmpfunc (const void * a, const void * b) {
+    return ( *(int*)a - *(int*)b );
+}
+
+int sortedarr[SEQSIZE];
+int isortedarr = -1, a;
+hashtable ht;
 
 int main()
 {
-    list testlist = {NULL};
-    listadd(&testlist,1);
-    listadd(&testlist,2);
-    listadd(&testlist,3);
-    listdelete(&testlist,2);
-    listprint(&testlist);
-    printf("Hello world!\n");
+    FILE *in = fopen("input.txt", "r");
+    FILE *out = fopen("output.txt", "w");
+    while ( (fscanf(in, "%d", &a) != EOF) && (a != 0) ){
+        (a > 0) ? htadd(&ht, a) : htremove(&ht, -a);
+    }
+    hashprint(&ht, &sortedarr[0], &isortedarr);
+    qsort(sortedarr, isortedarr+1, sizeof(int), cmpfunc);
+    for (int i = 0; i <= isortedarr; ++i){
+        fprintf(out, "%d ", sortedarr[i]);
+    }
     return 0;
 }
-
-// http://learnc.info/adt/linked_list.html
-// http://algolist.manual.ru/ds/s_has.php
-// https://gist.github.com/tonious/1377667

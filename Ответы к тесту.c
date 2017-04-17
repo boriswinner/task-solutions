@@ -16,11 +16,12 @@ int main()
     fscanf(in,"%d %d \n",&p,&q);
     for (int i = 0; i < p; ++i){
         for (int j = 0; j < q; ++j){
-            answers[i][j] = (getc(in) == '+');
-            fscanf(in,"%d",&scores[i]);
+            char c = getc(in);
+            answers[i][j] = (c == '+');
         }
+        fscanf(in,"\n %d \n",&scores[i]);
     }
-    for (int combination = 11; combination < pow(2,q); ++combination){
+    for (int combination = 0; combination < pow(2,q); ++combination){
         bool isres = true;
         int tmpcnt = 0;
 
@@ -51,7 +52,10 @@ int main()
             }
         }
         if (isres){
-            fprintf(out,"%s", s);
+            for (int q = 0; (s[q] == '1' || s[q] == '0'); q++){
+                fprintf(out,"%c",((s[q] == '1') ? '+' : '-'));
+            }
+            //fprintf(out,"%s", s);
             break;
         }
     }

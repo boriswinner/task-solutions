@@ -52,34 +52,17 @@ int main() {
         for (int j = 0; conditions[j].dig1 != 0; ++j) {
             if (!flag) break;
             if ((conditions[j].cond[0] == '>') && (conditions[j].cond[1] == '=')) {
-                if (!(s[conditions[j].dig1-1] >= s[conditions[j].dig2-1])) {
-                    flag = false;
-                    continue;
-                }
+                flag = (s[conditions[j].dig1-1] >= s[conditions[j].dig2-1]);
             } else if ((conditions[j].cond[0] == '<') && (conditions[j].cond[1] == '=')) {
-                if (!(s[conditions[j].dig1-1] <= s[conditions[j].dig2-1])) {
-                    flag = false;
-                    continue;
-                }
+                flag = (s[conditions[j].dig1-1] <= s[conditions[j].dig2-1]);
             } else if ((conditions[j].cond[0] == '<') && (conditions[j].cond[1] == '>')) {
-                if (!(s[conditions[j].dig1-1] != s[conditions[j].dig2-1])) {
-                    flag = false;
-                    continue;
-                }
+                flag = (s[conditions[j].dig1-1] != s[conditions[j].dig2-1]);
             } else if (conditions[j].cond[0] == '>') {
-                if (!(s[conditions[j].dig1-1] > s[conditions[j].dig2-1])) {
-                    flag = false;
-                    continue;
-                }
+                flag = (s[conditions[j].dig1-1] > s[conditions[j].dig2-1]);
             } else if (conditions[j].cond[0] == '<') {
-                if (!(s[conditions[j].dig1-1] < s[conditions[j].dig2-1])) {
-                    flag = false;
-                    continue;
-                }
+                flag = (s[conditions[j].dig1-1] < s[conditions[j].dig2-1]);
             } else if (conditions[j].cond[0] == '=') {
-                if (!(s[conditions[j].dig1 - 1] == s[conditions[j].dig2 - 1])) {
-                    flag = false;
-                }
+                flag = (s[conditions[j].dig1 - 1] == s[conditions[j].dig2 - 1]);
             }
         }
         if (flag) cnt++;

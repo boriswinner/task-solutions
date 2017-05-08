@@ -58,24 +58,6 @@ int deleteRoot(heap* aheap){
     return (root);
 }
 
-void heapArrayPrint(heap* aheap){
-    for (int i = 0; i < aheap->HeapSize; ++i){
-        printf("%d ",aheap->h[i]);
-    }
-}
-
-void heapPrint(heap* aheap){
-    int i = 0, k = 1;
-    while (i < aheap->HeapSize){
-        while ((i < aheap->HeapSize) && (i < k)){
-            printf("%d ",aheap->h[i]);
-            ++i;
-        }
-        printf("\n");
-        k = k*2 + 1;
-    }
-}
-
 int main() {
     heap minh, maxh;
     initializeHeap(&minh,MINHEAP);

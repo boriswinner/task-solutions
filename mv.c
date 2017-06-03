@@ -12,53 +12,88 @@
 
 //gcc -o test test.c -lshlwapi
 
-bool FileExists(const char *fname)
-{
-    return(access(fname, 0) != -1);
+int moveFileFolderToFileFolder(int argc, char** argv, int s, int d, bool force, bool interactive){
+    int res = 0;
+    if (force){
+        res = MoveFileEx(argv[s],argv[d],MOVEFILE_REPLACE_EXISTING);
+    }else if (interactive){
+        printf("replace file %s with file %s ?[y/n] \n",argv[d],argv[s]);
+        char treplace; scanf("%c",&treplace);
+        if (treplace == 'y'){
+            res = MoveFileEx(argv[s],argv[d],MOVEFILE_REPLACE_EXISTING);
+        } else{
+            printf("didn't replace file %s with file %s \n",argv[d],argv[s]);
+            return 0;
+        }
+    } else{
+        res = MoveFile(argv[s],argv[d]);
+    }
+    (res ? printf("Success! \n") : printf ("Error: can't move file or folder #%d to  destination #%d\n",s,d));
 }
 
-BOOL DirectoryExists(LPCTSTR szPath)
-{
-    DWORD dwAttrib = GetFileAttributes(szPath);
-    return (dwAttrib != INVALID_FILE_ATTRIBUTES &&
-            (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+int moveFileToFolder(int argc, char** argv, int s, int d, bool force, bool interactive){
+    int resRename = 0, resAppend = 1;
+    char dest [SIZE]; strcpy(dest, argv[d]);
+    char* t = PathFindFileName(argv[s]);
+    resAppend = PathAppend(dest,t);
+    if (force){
+        resRename = MoveFileEx(argv[s],dest,MOVEFILE_REPLACE_EXISTING);
+    } else if (interactive){
+        printf("replace file %s with file %s ?[y/n] \n",dest,argv[s]);
+        char treplace; scanf("%c",&treplace);
+        if (treplace == 'y'){
+            resRename = MoveFileEx(argv[s],dest,MOVEFILE_REPLACE_EXISTING);
+        } else{
+            printf("didn't replace file %s with file %s \n",dest,argv[s]);
+        }
+    } else{
+        resRename = MoveFile(argv[s],dest);
+    }
+    if (!(resAppend)){
+        printf("Error: can't append path at file or directory #%d \n",s);
+    } else if  (!resRename){
+        printf("Error: can't move file or directory #%d to destination $%d \n",s,d);
+    } else{
+        printf("Success! \n");
+    }
 }
 
 int main(int argc, char **argv) {
-
-    for (int i = 1; i < argc - 1; ++i){
-        if (!PathFileExists(argv[i])){
-            printf("error: file or directory doesn't exist");
-            sleep(3);
+    bool force = 0, interactive = 0;
+    int fileargs = 0;
+    for (int i = 1; i < argc; ++i){
+        if (argv[i][0] == '-'){
+            if (argv[i][1] == 'f'){
+                force = 1;
+            } else if (argv[i][1] == 'i'){
+                interactive = 1;
+            }
+        } else {
+            fileargs++;
+        }
+    }
+    for (int i = 1; i < fileargs; ++i){
+        if(!(PathFileExists(argv[i]))){
+            printf("Error: file or directory #%d doesn't exist", i);
             return -1;
         }
     }
 
-    if (PathIsDirectory(argv[argc - 1])){
-        for (int i = 1; i < argc - 1; ++i){
-            char d [SIZE]; strcpy(d, argv[argc-1]);
-            char* t = PathFindFileName(argv[i]);
-            PathAppend(d,t);
-            rename(argv[i],d);
+    if (argc == 2){
+        printf("Error: destination is not provided");
+        return -1;
+    } else if (PathIsDirectory(argv[fileargs])){
+        for (int i = 1; i < fileargs; ++i){
+            if (PathIsDirectory(argv[i])){
+                moveFileFolderToFileFolder(argc, argv, i, argc-1,force,interactive);
+            } else{
+                moveFileToFolder(argc, argv, i, argc-1,force,interactive);
+            }
         }
-    } else if (argc == 3){
-        int a = rename(argv[1],argv[2]);
-        (a ? printf ("error") : printf("success!"));
-        sleep(3);
+    } else if (fileargs == 2){
+        moveFileFolderToFileFolder(argc,argv,1,2,force,interactive);
+    } else{
+        printf("Error \n");
     }
-
-    /*if (DirectoryExists(s2)){
-    //    return(MoveFile(s1,s2));
-        //MoveFileToDir(s1,s2);
-        //MoveFile(s1,s2);
-        //return(rename(s1,fnmerge(s2,PathFindFileName(s1)));
-        //return(rename(s1,PathFindFileName(s1)));
-    }
-    if (FileExists(s1) && (!DirectoryExists(s2))){
-        return(rename(s1,s2));
-    }
-    /*if (PathFileExistsA(s2) == 0){
-        rename(s1,s2);
-    }*/
     return 0;
 }

@@ -6,6 +6,8 @@
 #include <shlwapi.h>
 #include "Shlwapi.h"
 #include <WinDef.h>
+#include <unistd.h>
+
 #define SIZE 255
 
 //gcc -o test test.c -lshlwapi
@@ -22,56 +24,41 @@ BOOL DirectoryExists(LPCTSTR szPath)
             (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
-/*void MoveFileToDir(int* s1, int* s2){
-    char fname[9];
-    char dir[64];
-    char drive[3];
-    char ext[5];
-    _splitpath(s1,drive, dir, fname, ext);
-    char* s1_clear = malloc(SIZE*sizeof(char));
-    int i = 0;
-    for (; s2[i] != '\0'; ++i){
-        s1_clear[i] = s2[i];
-    }
-    for (; fname[i] != '\0'; ++i){
-        s1_clear[i] = fname[i];
-    }
-    s1_clear[i+1] = '.';
-    for (;ext[i] != '\0'; ++i){
-        s1_clear[i] = ext[i];
-    }
-    s1_clear[i+1] = '\0';
-
-    rename(s1,s1_clear);
-}*/
-
 int main(int argc, char **argv) {
-    char* s1 = malloc(SIZE* sizeof(char));
-    char* s2 = malloc(SIZE* sizeof(char));
-    gets(s1);
-    //extract file name
-    char *lpStr1;
-    lpStr1 = s1;
-    printf("%s",     PathFindFileName(lpStr1));
 
-    gets(s2);
-    char *lpStr2;
-    lpStr1 = s2;
-    printf("%s",     PathFindFileName(lpStr2));
+    for (int i = 1; i < argc - 1; ++i){
+        if (!PathFileExists(argv[i])){
+            printf("error: file or directory doesn't exist");
+            sleep(3);
+            return -1;
+        }
+    }
 
-    //if (DirectoryExists(s2)){
-        return(MoveFile(s1,s2));
+    if (PathIsDirectory(argv[argc - 1])){
+        for (int i = 1; i < argc - 1; ++i){
+            char d [SIZE]; strcpy(d, argv[argc-1]);
+            char* t = PathFindFileName(argv[i]);
+            PathAppend(d,t);
+            rename(argv[i],d);
+        }
+    } else if (argc == 3){
+        int a = rename(argv[1],argv[2]);
+        (a ? printf ("error") : printf("success!"));
+        sleep(3);
+    }
+
+    /*if (DirectoryExists(s2)){
+    //    return(MoveFile(s1,s2));
         //MoveFileToDir(s1,s2);
         //MoveFile(s1,s2);
         //return(rename(s1,fnmerge(s2,PathFindFileName(s1)));
         //return(rename(s1,PathFindFileName(s1)));
-   // }
-   /* if (FileExists(s1) && (!DirectoryExists(s2))){
+    }
+    if (FileExists(s1) && (!DirectoryExists(s2))){
         return(rename(s1,s2));
-    }*/
+    }
     /*if (PathFileExistsA(s2) == 0){
         rename(s1,s2);
     }*/
-    printf("Hello, World!\n");
     return 0;
 }

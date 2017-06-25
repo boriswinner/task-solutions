@@ -73,4 +73,4 @@ begin
       write (f2,' ');
     end;
   close (f2);
-end.Dijkstra
+end.
